@@ -1,0 +1,20 @@
+{
+  "name": "simple-record-control",
+  "version": "0.0.1",
+  "description": "Express.js and PM2 based remote start/stop button for FFmpeg.",
+  "main": "js/server.js",
+  "directories": {
+    "doc": "docs"
+  },
+  "dependencies": {
+    "body-parser": "^1.18.2",
+    "express": "^4.16.3",
+    "pm2": "^2.10.2"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "jason a. grafft",
+  "license": "MIT"
+}

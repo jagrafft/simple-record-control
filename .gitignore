@@ -1,0 +1,7 @@
+.DS_Store
+.vscode
+
+sources.json
+
+local_docs/
+node_modules/
