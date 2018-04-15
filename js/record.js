@@ -1,5 +1,8 @@
 const exec = require("exec");
 
-const settings = require("./config/settings.json");
-const sources = require("./config/sources.json");
+const settings = require("./resources/settings.json");
+const sources = require("./resources/sources.json");
 
+process.on('SIGINT', function() {
+    // stop ffmpeg procs "gracefully"
+});

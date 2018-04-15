@@ -5,7 +5,7 @@ const bodyParser = require("body-parser");
 const pm2 = require("pm2");
 
 const handlers = require("./handlers");
-const min = require("./config/css.json");
+const min = require("./resources/css.json");
 
 app.use(bodyParser.urlencoded({ extended: true }));
 
@@ -28,8 +28,12 @@ app.get("/", (req, res) => {
 });
 
 app.post("/", (req, res) => {
-    console.log(req.body);
-    // 1. Start pm2 process(es)
+    let deviceIds = [];
+    for (let key in req.body) {
+        deviceIds.push(key);
+    }
+    console.log(deviceIds);
+    // 1. pass deviceIds to pm2 process
     // 2. if OK =>
     res.status(202);
     // res.send('{ "status" : "recording" }'); ??

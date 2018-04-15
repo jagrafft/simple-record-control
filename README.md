@@ -2,7 +2,7 @@
 Lightweight HTTP interface for synchronously starting and stopping multiple recording processes. Based on [Express.js](https://expressjs.com/) and [PM2](http://pm2.keymetrics.io/) and built for use with [FFmpeg](https://ffmpeg.org/).
 
 ## Settings and Sources
-Settings and data sources are specified in two JSON files found in `config/`
+Settings and data sources are specified in two JSON files found in `resources/`
 
 ### *settings.json*
 ```json
