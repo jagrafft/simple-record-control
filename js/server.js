@@ -1,25 +1,30 @@
 /*jslint es6 */
+
 const app = require("express")();
 const bodyParser = require("body-parser");
 const pm2 = require("pm2");
 
 const handlers = require("./handlers");
+const min = require("./config/css.json");
 
 app.use(bodyParser.urlencoded({ extended: true }));
 
 app.get("/", (req, res) => {
-    const sourceIdInputs = handlers.getSource().map((s) => {
-        const checkbox = '<input type="checkbox" name="' + s.id + '">';
-        const label = '<label for="' + s.name + '">' + s.name + '</label>';
-        return checkbox + label;
+    const devices = handlers.getSource().map((s) => {
+        return '<label class="device"><input type="checkbox" class="smooth" name="' + s.id + '">' + s.name + '</label>';
     }).join("");
     
     // TODO Refresh page on successful POST
-    const sourceSelectForm = '<form method="post">' + sourceIdInputs + '<br><input type="submit" value="record"></form>';
+    const record = '<div class="block"><form method="post">' + devices + '<p><input class="btn btn-b smooth" type="submit" value="record"></p></form></div>';
     
-    // const status = "";
+    // const processes = handlers.getStatus().map((s) => {
+        // ...
+    // }).join("");
+    const processes = '<input type="text" name="w00t"><select name="selecting"><option value=0>zero</option><option value=1>one</option><option value=2>two</option><option value=3 selected>three</option><option value=4>four</option></select>';
+
+    const status  = '<div class="block"><form action="/stop" method="post">' + processes + '<br><input class="btn btn-c smooth" type="submit" value="stop"></form></div>';
     
-    res.send(sourceSelectForm);
+    res.send('<html><head><title>Simple Record | Controls</title><style>' + min.css + '</style></head><body>' + record + status + '</body></html>');
 });
 
 app.post("/", (req, res) => {
@@ -35,7 +40,8 @@ app.post("/", (req, res) => {
 
 app.post("/stop", (req, res) => {
     console.log("!STOP");
-    res.send("STOP");
+    console.log(req.body);
+    // res.send("STOP");
 });
 
 app.listen(3000, () => console.log("listening on port 3000..."));

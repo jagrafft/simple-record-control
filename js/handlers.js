@@ -6,4 +6,10 @@ function getSource(index = null) {
     return result;
 }
 
+function getStatus(index = null) {
+    const result = index == null ? "all" : "index = " + index;
+    return result;
+}
+
 module.exports.getSource = getSource;
+module.exports.getStatus = getStatus;
