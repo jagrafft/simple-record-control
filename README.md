@@ -1,5 +1,5 @@
 # Simple Record Control
-Lightweight HTTP interface for synchronously starting and stopping multiple recording processes. Based on [Express.js](https://expressjs.com/) and [PM2](http://pm2.keymetrics.io/) and built for use with [FFmpeg](https://ffmpeg.org/).
+Lightweight HTTP interface for synchronously starting and stopping multiple recording processes. Based on [Express.js](https://expressjs.com/) and [PM2](http://pm2.keymetrics.io/) and built for use with [FFmpeg](https://ffmpeg.org/) with plans to expand support to [GStreamer](https://gstreamer.freedesktop.org/) as well.
 
 ## Resources
 Settings and data sources are specified in JSON files found in `./js/resources/`
@@ -22,6 +22,8 @@ Settings and data sources are specified in JSON files found in `./js/resources/`
     }
 }
 ```
+
+### *settings.json*
 
 ### *sources.json*
 (id = 0) == (id = 1)
@@ -48,6 +50,7 @@ Settings and data sources are specified in JSON files found in `./js/resources/`
 ```
 
 ## Custom Docker Container
+In the works...
 ```docker
 docker pull ...
 
