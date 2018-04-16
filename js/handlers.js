@@ -1,13 +1,24 @@
 /*jslint es6 */
+const { existsSync, mkdirSync } = require('fs');
 const sources = require("./resources/sources.json");
 
+function checkRecordDir(dir = "./recordings") {
+    if (existsSync(dir)) {
+        return true;
+    } else {
+        mkdirSync(dir);
+        let exists = existsSync(dir) ? true : false;
+        return exists;
+    }
+}
+
 function getSource(index = null) {
-    const result = index == null ? sources : sources[index];
+    let result = index == null ? sources : sources[index];
     return result;
 }
 
 function getStatus(index = null) {
-    const result = index == null ? "all" : "index = " + index;
+    let result = index == null ? "all" : "index = " + index;
     return result;
 }
 
@@ -17,6 +28,7 @@ function uuid() {
     return b;
 }
 
+module.exports.checkRecordDir = checkRecordDir;
 module.exports.getSource = getSource;
 module.exports.getStatus = getStatus;
 module.exports.uuid = uuid;

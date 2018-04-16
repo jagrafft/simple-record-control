@@ -1,11 +1,20 @@
 /*jslint es6 */
 
-const app = require("express")();
-const bodyParser = require("body-parser");
-const pm2 = require("pm2");
+const app = require('express')();
+const bodyParser = require('body-parser');
+const moment = require('moment');
+const pm2 = require('pm2');
+const handlers = require('./handlers');
+const min = require('./resources/css.json');
 
-const handlers = require("./handlers");
-const min = require("./resources/css.json");
+const recordDir = handlers.checkRecordDir();
+
+if (!recordDir) {
+    console.log('Problem creating ./recordings, please investigate. Exiting...');
+    process.exit(0);
+}
+
+let procs = {};
 
 app.use(bodyParser.urlencoded({ extended: true }));
 
@@ -32,19 +41,58 @@ app.post("/", (req, res) => {
     for (let key in req.body) {
         deviceIds.push(key);
     }
-    console.log(deviceIds);
-    // 1. pass deviceIds to pm2 process
-    // 2. if OK =>
-    res.status(202);
-    // res.send('{ "status" : "recording" }'); ??
-    // else =>
-    // res.status(500);
-    // ... ?
+    
+    if (deviceIds.length > 0) {
+        pm2.connect(function(error) {
+            if (error) {
+                console.error(error);
+                return pm2.disconnect();
+            }
+
+            const now = moment();
+            let name = handlers.uuid();
+            console.log("starting " + name);
+
+            pm2.start({
+                script: './js/record.js', 
+                name: name,
+                args: deviceIds
+            },
+            function(error, app) {
+                if (error) {
+                    console.error(error);
+                } else {
+                    procs[name] = { 
+                        time: now.format("X"),
+                        sources: deviceIds,
+                        lastChecked: now,
+                        status: "online"
+                    };
+                }
+
+                return pm2.disconnect();
+            });
+        });
+        // 2. if OK =>
+        res.status(202);
+        // res.send('{ "status" : "recording" }'); ??
+        // else =>
+        // res.status(500);
+        // ... ?
+    } else {
+        console.log("empty request");
+    }
 });
 
+// TODO stop selected && stop all
+// STOPS ALL ACTIVE PROCS
 app.post("/stop", (req, res) => {
-    console.log("!STOP");
-    console.log(req.body);
+    for (proc in procs) {
+        console.log("stopping " + proc);
+        pm2.stop(proc, function(error) {
+            if (error) console.error(error);
+        });
+    }
     // res.send("STOP");
 });
 
