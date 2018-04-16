@@ -1,6 +1,8 @@
 .DS_Store
 .vscode
 
+*.log
+
 sources.json
 
 local_docs/

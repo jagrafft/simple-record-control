@@ -7,7 +7,7 @@ const sources = require('./resources/sources.json');
 const args = process.argv.slice(2, process.argv.length);
 
 // TODO ./recordings to global var or function or ...
-const outdir = './recordings/' + moment().format('Y-MM-DD_HH.mm.ss');
+const outdir = './recordings/' + moment().format('YMMDD-HHmmss');
 if (!existsSync(outdir)) mkdirSync(outdir);
 
 // TODO Improve flexibility of encoder/decoder utilization
@@ -18,22 +18,26 @@ for (i = 0; i < args.length; i++) {
     let source = sources.filter((s) => s.id == args[i])[0];
     let encoder = encoders[source.encoder];
     
-    console.log("args[" + i + "] = " + args[i]);
-    console.log("source " + JSON.stringify(source));
-    
     inputs.push(encoder.preInput + ' -i "' + source.addr +'"');
     outputs.push('-map ' + i + ' ' + encoder.postInput + ' "' + outdir + '/' + source.name + '.' + encoder.videoFormat + '"');
 }
 
-// TODO Move util to settings
-let cmd = ["ffmpeg", "-y"].concat(inputs.concat(outputs)).join(" ");
+let ffmpeg = ['ffmpeg','-report', '-y'].concat(inputs.concat(outputs)).join(' ');
 
-console.log(cmd);
-exec(cmd);
+console.log(ffmpeg);
+// TODO Move util (ffmpeg) to settings
+exec(ffmpeg, (error, stdout, stderr) => {
+    if (error) {
+        console.error('error: ' + error);
+        // TODO report FAILURE
+    } // TODO else { report SUCCESS }
 
-process.on('SIGINT', function() {
-    // Timeout to allow clean shutdown of multiple recording proccesses.
-    setTimeout(function() {
+    console.log(stdout);
+    console.error('stderr: ' + stderr);
+});
+
+process.on('SIGINT', () => {
+    setTimeout(() => {
         process.exit(0);
     }, 800);
 });

@@ -1,11 +1,11 @@
 {
     "default": {
-        "preInput": "-thread_queue_size 64 -rtsp_transport tcp -f rtsp -r 25",
+        "preInput": "-thread_queue_size 1024 -rtsp_transport tcp -f rtsp -r 25",
         "postInput": "-c:v libvpx-vp9 -g 30 -f webm",
         "videoFormat": "webm"
     },
     "x264": {
-        "preInput": "-thread_queue_size 64 -rtsp_transport tcp -f rtsp -r 25",
+        "preInput": "-thread_queue_size 1024 -rtsp_transport tcp -f rtsp -r 25",
         "postInput": "-c:v libx264 -profile:v high -an",
         "videoFormat": "mp4"
     }
