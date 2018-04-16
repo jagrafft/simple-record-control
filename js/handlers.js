@@ -1,4 +1,3 @@
-/*jslint es6 */
 const { existsSync, mkdirSync } = require('fs');
 const sources = require("./resources/sources.json");
 

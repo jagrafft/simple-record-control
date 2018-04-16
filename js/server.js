@@ -1,9 +1,8 @@
-/*jslint es6 */
 const app = require('express')();
 const bodyParser = require('body-parser');
 const moment = require('moment');
 const pm2 = require('pm2');
-const pmx = require('pmx');
+
 const handlers = require('./handlers');
 const min = require('./resources/css.json');
 const settings = require('./resources/settings.json');
@@ -16,26 +15,23 @@ if (!baseRecordDirectory) {
 
 app.use(bodyParser.urlencoded({ extended: true }));
 
-const probe = pmx.probe();
 const formReload = 'onsubmit="setTimeout(function(){window.location.reload();},10)"';
-// TODO Replace with PM2 call(s)
-let processes = {};
 
 app.get('/', (req, res) => {
-    const devices = handlers.getSource().map((s) => {
-        return '<label class="device"><input type="checkbox" class="smooth" name="' + s.id + '">' + s.name + '</label>';
-    }).join("");
-    
-    // TODO Refresh page on SUCCESS
-    const record = '<div class="block"><form method="post" ' + formReload + '>' + devices + '<p><input class="btn btn-b smooth" type="submit" value="record"></p></form></div>';
-    
     pm2.connect((error) => {
-        // TODO Test fail strategy
         if (error) {
             console.error('error: ' + error);
             res.send('<!DOCTYPE html><html><head><title>Simple Record | Error</title></head><body><h1>PM2 Connection Error</h1></body></html>')
             return pm2.disconnect();            
         }
+
+        const devices = handlers.getSource().map((s) => {
+            return '<label class="device"><input type="checkbox" class="smooth" name="' + s.id + '">' + s.name + '</label>';
+        }).join("");
+        
+        // TODO Indicate SUCCESS/FAILURE on page
+        const record = '<div class="block"><form method="post" ' + formReload + '>' + devices + '<p><input class="btn btn-b smooth" type="submit" value="record"></p></form></div>';
+        
         // TODO Implement fail strategy
         pm2.list((error, processDescriptionList) => {
             // TODO Build PM2 list
@@ -43,8 +39,9 @@ app.get('/', (req, res) => {
             const status  = '<div class="block"><form action="/stop" method="post" ' + formReload + '>' + pm2list + '<br><input class="btn btn-c smooth" type="submit" value="stop"></form></div>';
             
             res.send('<!DOCTYPE html><html><head><title>Simple Record | Controls</title><style>' + min.css + '</style></head><body>' + record + status + '</body></html>');
+            return pm2.disconnect();
         });
-    })
+    });
 });
 
 app.post('/', (req, res) => {
@@ -66,13 +63,13 @@ app.post('/', (req, res) => {
                 }
 
                 const name = handlers.uuid();
-                let counter = probe.counter({ name: name });
                 console.log("starting " + name);
                 
                 pm2.start({
                     script: './js/record.js', 
                     name: name,
                     cwd: dir,
+                    restartDelay: 500,
                     args: [name].concat(deviceIds)
                 },
                 // TODO Wait for success/failure response
@@ -83,15 +80,7 @@ app.post('/', (req, res) => {
                 // res.status(500);
                 // ... ?
                 (error, app) => {
-                    if (error) {
-                        console.error(error);
-                    } else {
-                        // TODO Replace with PM2 call(s)
-                        processes[name] = { 
-                            time: now.format('X'),
-                            sources: deviceIds
-                        };
-                    }
+                    if (error) console.error(error);
                     return pm2.disconnect();
                 });
             });
@@ -103,19 +92,16 @@ app.post('/', (req, res) => {
     }
 });
 
-// TODO stop selected && stop all
-// STOPS ALL ACTIVE processes
+// TODO stop selected && stop all via PM2
 app.post('/stop', (req, res) => {
-    // TODO Replace with PM2 call(s)
-    for (let proc in processes) {
-        console.log('stopping ' + proc);
-        pm2.stop(proc, (error) => {
-            if (error) console.error(error);
-        });
-    }
-    // TODO Replace with PM2 call(s)
-    processes = {};
-    // res.send("STOP");
+    // pm2.connect((error) => {
+        // console.log('stopping ' + proc);
+        // pm2.stop(proc, (error) => {
+            // if (error) console.error(error);
+            // pm2.disconnect();
+        // });
+    // });
+    res.send("STOP");
 });
 
 app.listen(3000, () => console.log('listening on port 3000...'));
