@@ -1,6 +1,6 @@
 {
   "name": "simple-record-control",
-  "version": "0.0.5",
+  "version": "0.0.6",
   "description": "Express.js and PM2 based remote start/stop button for FFmpeg.",
   "main": "js/server.js",
   "directories": {
@@ -14,7 +14,12 @@
   },
   "devDependencies": {},
   "scripts": {
+    "server": "node ./js/server.js",
     "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jagrafft/simple-record.git"
   },
   "author": "jason a. grafft",
   "license": "MIT"

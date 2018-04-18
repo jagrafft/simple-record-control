@@ -9,6 +9,11 @@
         "postInput": "-c:v libx264 -profile:v high -an",
         "videoFormat": "mp4"
     },
+    "x264.2": {
+        "preInput": "-thread_queue_size 64 -rtsp_transport tcp -f rtsp",
+        "postInput": "-c:v libx264 -an",
+        "videoFormat": "mp4"
+    },
     "vp9-local": {
         "preInput": "-thread_queue_size 1024",
         "postInput": "-c:v libvpx-vp9 -an -g 30 -f webm",

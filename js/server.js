@@ -63,7 +63,7 @@ app.post('/', (req, res) => {
                 }
 
                 const name = handlers.uuid();
-                console.log("starting " + name);
+                console.log('starting ' + name);
                 
                 pm2.start({
                     script: './js/record.js', 
@@ -79,7 +79,7 @@ app.post('/', (req, res) => {
                 // else =>
                 // res.status(500);
                 // ... ?
-                (error, app) => {
+                (error) => {
                     if (error) console.error(error);
                     return pm2.disconnect();
                 });
@@ -94,14 +94,19 @@ app.post('/', (req, res) => {
 
 // TODO stop selected && stop all via PM2
 app.post('/stop', (req, res) => {
-    // pm2.connect((error) => {
-        // console.log('stopping ' + proc);
-        // pm2.stop(proc, (error) => {
-            // if (error) console.error(error);
-            // pm2.disconnect();
-        // });
-    // });
-    res.send("STOP");
+    pm2.connect((error) => {
+        if (error) {
+            console.error(error);
+            return pm2.disconnect();
+        }
+
+        console.log('pm2.delete("all", ...)');
+        pm2.delete('all', (error) => {
+            if (error) console.error('error: ' + error);
+            return pm2.disconnect();
+        });
+    });
+    // res.send('STOP');
 });
 
 app.listen(3000, () => console.log('listening on port 3000...'));
