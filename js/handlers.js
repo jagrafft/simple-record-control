@@ -1,4 +1,7 @@
-const { existsSync, mkdirSync } = require('fs');
+/*global require*/
+/*jslint es6*/
+
+const { existsSync, mkdirSync } = require("fs");
 const sources = require("./resources/sources.json");
 
 function createDirectory(dir) {
@@ -22,7 +25,7 @@ function getStatus(index = null) {
 
 function uuid() {
     // https://gist.github.com/LeverOne/1308368
-    for(b=a='';a++<36;b+=a*51&52?(a^15?8^Math.random()*(a^20?16:4):4).toString(16):'-');
+    for(b=a="";a++<36;b+=a*51&52?(a^15?8^Math.random()*(a^20?16:4):4).toString(16):"-");
     return b;
 }
 

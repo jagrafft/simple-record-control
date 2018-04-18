@@ -30,21 +30,16 @@ Settings and data sources are specified in JSON files found in `./js/resources/`
 ```json
 [
     {
-        "id": 0,
-        "name": "",
-        "addr": "rtsp://stream:user@192.168.0.101:554/..."
-    },
-    {
         "id": 1,
         "name": "",
         "addr": "rtsp://stream:user@192.168.0.101:554/...",
-        "setting": "default"
+        "encoder": "default"
     },
     {
         "id": 2,
         "name": "webcam",
         "addr": "/dev/video0",
-        "setting": "x264"
+        "encoder": "x264"
     }
 ]
 ```

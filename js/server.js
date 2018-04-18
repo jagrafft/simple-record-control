@@ -1,58 +1,64 @@
-const app = require('express')();
-const bodyParser = require('body-parser');
-const moment = require('moment');
-const pm2 = require('pm2');
+/*global require*/
+/*jslint es6*/
 
-const handlers = require('./handlers');
-const min = require('./resources/css.json');
-const settings = require('./resources/settings.json');
+const app = require("express")();
+const bodyParser = require("body-parser");
+const moment = require("moment");
+const pm2 = require("pm2");
+
+const handlers = require("./handlers");
+const min = require("./resources/css.json");
+const settings = require("./resources/settings.json");
+
+// TODO Implement websockets for communcation with client. (Long term)
 
 const baseRecordDirectory = handlers.createDirectory(settings.general.baseDir);
 if (!baseRecordDirectory) {
-    console.log('Problem creating "' + baseRecordDirectory + '", please investigate. Exiting...');
+    console.error(`Problem creating ${baseRecordDirectory}, please investigate. Exiting...`);
     process.exit(0);
 }
 
 app.use(bodyParser.urlencoded({ extended: true }));
 
-const formReload = 'onsubmit="setTimeout(function(){window.location.reload();},10)"';
+function reloadWindow(n) { return `setTimeout(function(){window.location.reload();},${n})`; }
 
-app.get('/', (req, res) => {
+app.get("/", (req, res) => {
     pm2.connect((error) => {
         if (error) {
-            console.error('error: ' + error);
-            res.send('<!DOCTYPE html><html><head><title>Simple Record | Error</title></head><body><h1>PM2 Connection Error</h1></body></html>')
-            return pm2.disconnect();            
+            console.error(`error: ${error}`);
+            res.send(`<!DOCTYPE html><html><head><title>Simple Record | Error</title></head><body><h1>PM2 Connection Error</h1></body></html>`);
+            return pm2.disconnect();
         }
 
         const devices = handlers.getSource().map((s) => {
-            return '<label class="device"><input type="checkbox" class="smooth" name="' + s.id + '">' + s.name + '</label>';
+            return `<label class="device"><input type="checkbox" class="smooth" name="${s.id}">${s.name}</label>`;
         }).join("");
-        
+
         // TODO Indicate SUCCESS/FAILURE on page
-        const record = '<div class="block"><form method="post" ' + formReload + '>' + devices + '<p><input class="btn btn-b smooth" type="submit" value="record"></p></form></div>';
-        
+        const record = `<div class="block"><form method="post" onsubmit="${reloadWindow(250)}">${devices}<p><input class="btn btn-b smooth" type="submit" value="record"></p></form></div>`;
+
         // TODO Implement fail strategy
         pm2.list((error, processDescriptionList) => {
-            // TODO Build PM2 list
-            const pm2list = '';
-            const status  = '<div class="block"><form action="/stop" method="post" ' + formReload + '>' + pm2list + '<br><input class="btn btn-c smooth" type="submit" value="stop"></form></div>';
-            
-            res.send('<!DOCTYPE html><html><head><title>Simple Record | Controls</title><style>' + min.css + '</style></head><body>' + record + status + '</body></html>');
+            const pm2list = processDescriptionList.map((p) => {
+                const created = moment(p.pm2_env.pm_uptime, "x").format("HH:mm:ss YYYY-MM-DD");
+                return `<tr><td><label class="process"><input type="checkbox" class="smooth" name="${p.name}"></label></td><td>${p.pm_id}</td><td>${p.name}</td><td>${p.pm2_env.status}</td><td>${created}</td></tr>`;
+            }).join("");
+
+            const status  = `<div class="block"><form action="/stop" method="post" onsubmit="${reloadWindow(1400)}"><table><tr><th></th><th>id</th><th>name</th><th>status</th><th>created</th></tr>${pm2list}</table><br><input class="btn btn-c smooth" type="submit" value="stop"></form></div>`;
+
+            res.send(`<!DOCTYPE html><html><head><title>Simple Record | Controls</title><style>${min.css}</style></head><body>${record}${status}</body></html>`);
             return pm2.disconnect();
         });
     });
 });
 
-app.post('/', (req, res) => {
+app.post("/", (req, res) => {
     let deviceIds = [];
-    for (let key in req.body) {
-        deviceIds.push(key);
-    }
+    for (key in req.body) { deviceIds.push(key); }
 
     if (deviceIds.length > 0) {
         const now = moment();
-        const dir = settings.general.baseDir + '/' + now.format('YMMDD-HHmmss');
+        const dir = `${settings.general.baseDir}/${now.format("YMMDD-HHmmss")}`;
         const dirAvailable = handlers.createDirectory(dir);
 
         if (dirAvailable) {
@@ -63,14 +69,17 @@ app.post('/', (req, res) => {
                 }
 
                 const name = handlers.uuid();
-                console.log('starting ' + name);
-                
+                console.log(`starting ${name}`);
+
                 pm2.start({
-                    script: './js/record.js', 
                     name: name,
+                    script: "./js/record.js",
+                    args: deviceIds,
                     cwd: dir,
-                    restartDelay: 500,
-                    args: [name].concat(deviceIds)
+                    output: `./${name}-out.log`,
+                    error: `./${name}-error.log`,
+                    minUptime: 500,
+                    restartDelay: 500
                 },
                 // TODO Wait for success/failure response
                 // 2. if OK =>
@@ -80,33 +89,33 @@ app.post('/', (req, res) => {
                 // res.status(500);
                 // ... ?
                 (error) => {
-                    if (error) console.error(error);
+                    if (error) console.error(`error: ${error}`);
                     return pm2.disconnect();
                 });
             });
         } else {
-            console.error('Cannot create directory "' + dir + '"');
+            console.error(`Cannot create directory "${dir}"`);
         }
     } else {
-        console.log('empty request');
+        console.log("Empty request");
     }
 });
 
 // TODO stop selected && stop all via PM2
-app.post('/stop', (req, res) => {
+app.post("/stop", (req, res) => {
     pm2.connect((error) => {
         if (error) {
             console.error(error);
             return pm2.disconnect();
         }
 
-        console.log('pm2.delete("all", ...)');
-        pm2.delete('all', (error) => {
-            if (error) console.error('error: ' + error);
+        console.log(`pm2.delete("all", ...)`);
+        pm2.delete("all", (error) => {
+            if (error) console.error(`error: ${error}`);
             return pm2.disconnect();
         });
     });
     // res.send('STOP');
 });
 
-app.listen(3000, () => console.log('listening on port 3000...'));
+app.listen(3000, () => console.log("listening on port 3000..."));
