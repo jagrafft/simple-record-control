@@ -9,10 +9,7 @@ const sources = require("./resources/sources.json");
 
 const args = process.argv.slice(2, process.argv.length);
 
-const timeGroup = moment().format("YMMDD-HHmmss");  // Timestamp format matches FFmpeg"s report flag
-
-// TODO Improve flexibility of encoder/decoder utilization
-// TODO Determine best method for individual streams to record to same directory.
+const timeGroup = moment().format("YMMDD-HHmmss");  // Timestamp format matches FFmpeg's `-report`
 
 // Pipe
 // const cmd = args.map((arg, i) => {
@@ -38,16 +35,16 @@ const cmd = ffmpeg.concat(inputs.concat(outputs)).join(" ");
 
 exec(cmd, (error, stdout, stderr) => {
     if (error) {
-        console.error("error: " + error);
+        console.error(error);
         // TODO report FAILURE
     } // TODO Report SUCCESS
 
     console.log(cmd);
-    console.log(`stdout: ${stdout}`);
-    console.error(`stderr: ${stderr}`);
+    console.log(stdout);
+    console.error(stderr);
 });
 
-// TODO Repair file or gracefully shutdown so file is usable on unexpected error
+// TODO Repair file/gracefully shutdown/.. => file is usable on unexpected error
 process.on("SIGINT", () => {
     setTimeout(() => {
         process.exit(0);

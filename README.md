@@ -5,6 +5,12 @@ Lightweight HTTP interface for synchronously starting and stopping multiple reco
 Settings and data sources are specified in JSON files found in `./js/resources/`
 
 ### *css.json*
+```json
+{
+    "_src": "...",
+    "css": "..."
+}
+```
 
 ### *encoders.json*
 *default* is required
@@ -24,6 +30,13 @@ Settings and data sources are specified in JSON files found in `./js/resources/`
 ```
 
 ### *settings.json*
+```json
+{
+    "general": {
+        "baseDir": "./recordings"
+    }
+}
+```
 
 ### *sources.json*
 (id = 0) == (id = 1)

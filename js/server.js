@@ -10,7 +10,13 @@ const handlers = require("./handlers");
 const min = require("./resources/css.json");
 const settings = require("./resources/settings.json");
 
-// TODO Implement websockets for communcation with client. (Long term)
+// LONG(ER) TERM TODOS/IDEAS/...
+// TODO Implement websockets for communcation with client.
+// TODO Terminate all active processes on shutdown.
+// TODO Improve flexibility of encoder/decoder utilization.
+// TODO Determine best method for individual streams to record to same directory.
+// TODO Supports FFmpeg and GStreamer
+// TODO Provide uptimes for processes to web interface
 
 const baseRecordDirectory = handlers.createDirectory(settings.general.baseDir);
 if (!baseRecordDirectory) {
@@ -25,7 +31,7 @@ function reloadWindow(n) { return `setTimeout(function(){window.location.reload(
 app.get("/", (req, res) => {
     pm2.connect((error) => {
         if (error) {
-            console.error(`error: ${error}`);
+            console.error(error);
             res.send(`<!DOCTYPE html><html><head><title>Simple Record | Error</title></head><body><h1>PM2 Connection Error</h1></body></html>`);
             return pm2.disconnect();
         }
@@ -40,7 +46,8 @@ app.get("/", (req, res) => {
         // TODO Implement fail strategy
         pm2.list((error, processDescriptionList) => {
             const pm2list = processDescriptionList.map((p) => {
-                const created = moment(p.pm2_env.pm_uptime, "x").format("HH:mm:ss YYYY-MM-DD");
+                const created = moment(p.pm2_env.created_at, "x").format("HH:mm:ss YYYY-MM-DD");
+                // const uptime = moment(p.pm2_env.pm_uptime, "x").format("HH:mm:ss YYYY-MM-DD");   // same value as created_at
                 return `<tr><td><label class="process"><input type="checkbox" class="smooth" name="${p.name}"></label></td><td>${p.pm_id}</td><td>${p.name}</td><td>${p.pm2_env.status}</td><td>${created}</td></tr>`;
             }).join("");
 
@@ -53,15 +60,15 @@ app.get("/", (req, res) => {
 });
 
 app.post("/", (req, res) => {
-    let deviceIds = [];
-    for (key in req.body) { deviceIds.push(key); }
+    const deviceIds = Object.keys(req.body);
 
     if (deviceIds.length > 0) {
         const now = moment();
         const dir = `${settings.general.baseDir}/${now.format("YMMDD-HHmmss")}`;
+        const baseDirAvailable = handlers.createDirectory(settings.general.baseDir);
         const dirAvailable = handlers.createDirectory(dir);
 
-        if (dirAvailable) {
+        if (baseDirAvailable && dirAvailable) {
             pm2.connect((error) => {
                 if (error) {
                     console.error(error);
@@ -89,19 +96,18 @@ app.post("/", (req, res) => {
                 // res.status(500);
                 // ... ?
                 (error) => {
-                    if (error) console.error(`error: ${error}`);
+                    if (error) console.error(error);
                     return pm2.disconnect();
                 });
             });
         } else {
-            console.error(`Cannot create directory "${dir}"`);
+            console.error(`Cannot create base directory OR "${dir}", please investigate.`);
         }
     } else {
         console.log("Empty request");
     }
 });
 
-// TODO stop selected && stop all via PM2
 app.post("/stop", (req, res) => {
     pm2.connect((error) => {
         if (error) {
@@ -109,13 +115,18 @@ app.post("/stop", (req, res) => {
             return pm2.disconnect();
         }
 
-        console.log(`pm2.delete("all", ...)`);
-        pm2.delete("all", (error) => {
-            if (error) console.error(`error: ${error}`);
-            return pm2.disconnect();
+        let procs = Object.keys(req.body);
+        if (procs.length == 0) procs = ["all"];
+
+        procs.forEach((p) => {
+            pm2.delete(p, (error) => {
+                if (error) console.error(error);
+                console.log(`deleting ${p} ...`);
+                return pm2.disconnect();
+            });
         });
     });
-    // res.send('STOP');
+    // res.send('STOPPED');
 });
 
 app.listen(3000, () => console.log("listening on port 3000..."));
