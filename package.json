@@ -1,7 +1,7 @@
 {
   "name": "simple-record-control",
-  "version": "0.0.7",
-  "description": "Express.js and PM2 based remote start/stop button for FFmpeg.",
+  "version": "0.0.8",
+  "description": "Lightweight HTTP interface for synchronously starting and stopping multiple recording processes.",
   "main": "js/server.js",
   "directories": {
     "doc": "docs"

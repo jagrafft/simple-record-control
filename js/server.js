@@ -16,7 +16,6 @@ const settings = require("./resources/settings.json");
 // TODO Improve flexibility of encoder/decoder utilization.
 // TODO Determine best method for individual streams to record to same directory.
 // TODO Supports FFmpeg and GStreamer
-// TODO Provide uptimes for processes to web interface
 
 const baseRecordDirectory = handlers.createDirectory(settings.general.baseDir);
 if (!baseRecordDirectory) {
@@ -45,13 +44,14 @@ app.get("/", (req, res) => {
 
         // TODO Implement fail strategy
         pm2.list((error, processDescriptionList) => {
+            const now = moment();
             const pm2list = processDescriptionList.map((p) => {
-                const created = moment(p.pm2_env.created_at, "x").format("HH:mm:ss YYYY-MM-DD");
-                // const uptime = moment(p.pm2_env.pm_uptime, "x").format("HH:mm:ss YYYY-MM-DD");   // same value as created_at
-                return `<tr><td><label class="process"><input type="checkbox" class="smooth" name="${p.name}"></label></td><td>${p.pm_id}</td><td>${p.name}</td><td>${p.pm2_env.status}</td><td>${created}</td></tr>`;
+                const created = moment(p.pm2_env.created_at);
+                const uptime = moment.duration(now.diff(created));
+                return `<tr><td><label class="process"><input type="checkbox" class="smooth" name="${p.name}"></label></td><td>${p.pm_id}</td><td>${p.name}</td><td>${p.pm2_env.status}</td><td>${created.format("HH:mm:ss YYYY-MM-DD")}</td><td>${uptime.hours()}h${uptime.minutes()}m${uptime.seconds()}s</td><td>${p.pm2_env.restart_time}</td></tr>`;
             }).join("");
 
-            const status  = `<div class="block"><form action="/stop" method="post" onsubmit="${reloadWindow(1400)}"><table><tr><th></th><th>id</th><th>name</th><th>status</th><th>created</th></tr>${pm2list}</table><br><input class="btn btn-c smooth" type="submit" value="stop"></form></div>`;
+            const status  = `<div class="block"><form action="/stop" method="post" onsubmit="${reloadWindow(1600)}"><table><tr><th></th><th>id</th><th>name</th><th>status</th><th>created</th><th>uptime</th><th>restarts</th></tr>${pm2list}</table><br><input class="btn btn-c smooth" type="submit" value="stop"></form></div>`;
 
             res.send(`<!DOCTYPE html><html><head><title>Simple Record | Controls</title><style>${min.css}</style></head><body>${record}${status}</body></html>`);
             return pm2.disconnect();
