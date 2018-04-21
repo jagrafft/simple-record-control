@@ -1,5 +1,4 @@
 {
-    "general": {
-        "baseDir": "./recordings"
-    }
+    "baseDir": "./recordings",
+    "utility": "ffmpeg"
 }

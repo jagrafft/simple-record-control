@@ -6,18 +6,25 @@ const bodyParser = require("body-parser");
 const moment = require("moment");
 const pm2 = require("pm2");
 
-const handlers = require("./handlers");
+const handlers = require("./utilities/handlers.js");
 const min = require("./resources/css.json");
 const settings = require("./resources/settings.json");
 
-// LONG(ER) TERM TODOS/IDEAS/...
+// PUNCH LIST
 // TODO Implement websockets for communcation with client.
+// TODO Implement message passing between processes.
 // TODO Terminate all active processes on shutdown.
 // TODO Improve flexibility of encoder/decoder utilization.
-// TODO Determine best method for individual streams to record to same directory.
-// TODO Supports FFmpeg and GStreamer
+// TODO Determine method for individual streams to record to same directory.
+// TODO Supports FFmpeg and GStreamer.
+// TODO Supports audio.
 
-const baseRecordDirectory = handlers.createDirectory(settings.general.baseDir);
+if (settings.utility != "ffmpeg" || settings.utility != "gstreamer") {
+    console.error(`Supported utilities are FFmpeg ("ffmpeg") and GStreamer ("gstreamer").\nCurrently settings.utility == ${settings.utility}\nPlease edit ./js/resources/settings.json appropriately.\nExiting...`);
+    process.exit(0);
+}
+
+const baseRecordDirectory = handlers.createDirectory(settings.baseDir);
 if (!baseRecordDirectory) {
     console.error(`Problem creating ${baseRecordDirectory}, please investigate. Exiting...`);
     process.exit(0);
@@ -64,8 +71,8 @@ app.post("/", (req, res) => {
 
     if (deviceIds.length > 0) {
         const now = moment();
-        const dir = `${settings.general.baseDir}/${now.format("YMMDD-HHmmss")}`;
-        const baseDirAvailable = handlers.createDirectory(settings.general.baseDir);
+        const dir = `${settings.baseDir}/${now.format("YMMDD-HHmmss")}`;
+        const baseDirAvailable = handlers.createDirectory(settings.baseDir);
         const dirAvailable = handlers.createDirectory(dir);
 
         if (baseDirAvailable && dirAvailable) {
@@ -80,7 +87,7 @@ app.post("/", (req, res) => {
 
                 pm2.start({
                     name: name,
-                    script: "./js/record.js",
+                    script: `./js/${settings.utility}.js`,
                     args: deviceIds,
                     cwd: dir,
                     output: `./${name}-out.log`,
@@ -88,13 +95,6 @@ app.post("/", (req, res) => {
                     minUptime: 500,
                     restartDelay: 500
                 },
-                // TODO Wait for success/failure response
-                // 2. if OK =>
-                // res.status(202);
-                // res.send('{ "status" : "recording" }'); ??
-                // else =>
-                // res.status(500);
-                // ... ?
                 (error) => {
                     if (error) console.error(error);
                     return pm2.disconnect();

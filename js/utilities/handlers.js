@@ -2,7 +2,7 @@
 /*jslint es6*/
 
 const { existsSync, mkdirSync } = require("fs");
-const sources = require("./resources/sources.json");
+const sources = require("../resources/sources.json");
 
 function createDirectory(dir) {
     if (existsSync(dir)) {
