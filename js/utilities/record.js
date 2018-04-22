@@ -7,7 +7,8 @@ const moment = require("moment");
 const ts = moment().format("YMMDD-HHmmss");  // Timestamp format matches FFmpeg's `-report`
 const cmd = process.argv[2].replace("__TS__", ts);
 
-exec(cmd, (error, stdout, stderr) => {
+// maxBuffer = 128MiB = (128 * 1024 * 1024)bytes = 134217728bytes
+exec(cmd, { maxBuffer: 134217728 }, (error, stdout, stderr) => {
     if (error) {
         console.error(error);
     }

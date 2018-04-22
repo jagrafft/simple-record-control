@@ -102,3 +102,11 @@ docker pull ...
 
 docker run --rm -it -p 127.0.0.1:13117:3000 -v {LOCAL_PATH}:/opt/ffmpeg/out simple-record
 ```
+
+## Notes
+- The `maxBuffer` option of `child_process.exec` imposes a limit on maximum recording time per process call (in my tests this was ~13-19 minutes depending on settings). `simple-record-control` uses 128MiB for `maxBuffer`, which *should* be sufficient for a large number of cases. If you find recordings are "timing out" round the same time with a given setting, do two things
+
+1. Check the logs to see what they are filling up with. Do you need to increase `maxBuffer` or fix your instructions? Chances are excellent it's the latter.
+2. Make the fixes and run more tests.
+
+If the problem persists, increase `maxBuffer` and run more tests.

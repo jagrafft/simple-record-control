@@ -12,15 +12,16 @@ const settings = require("./resources/settings.json");
 
 // PUNCH LIST
 // TODO Implement websockets for communcation with client.
-// TODO Implement message passing between processes.
+// TODO Implement PM2 messaging.
 // TODO Terminate all active processes on shutdown.
-// TODO Determine method for individual streams to record to same directory.
 // TODO Supports FFmpeg and GStreamer.
 // TODO Supports audio recording.
 // TODO Improve FFmpeg JSON preset format.
 // TODO Create GStreamer JSON preset format.
 // TODO Add support for nesting (group -> processes) to client interface.
 // TODO Allow closure of process groups. (In addition to "all" and by name.)
+// TODO Customize FFmpeg log name. (Timestamp proximity causes overwrite.)
+// TODO Implement recovery method(s) for unclosed files.
 
 if (settings.utility != "ffmpeg" && settings.utility != "gstreamer") {
     console.error(`Supported utilities are FFmpeg ("ffmpeg") and GStreamer ("gstreamer").\nCurrently settings.utility == ${settings.utility}\nPlease edit ./js/resources/settings.json appropriately.\nExiting...`);

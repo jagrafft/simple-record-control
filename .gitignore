@@ -2,6 +2,8 @@
 .vscode
 
 *.log
+*.mp4
+*.webm
 
 sources.json
 
