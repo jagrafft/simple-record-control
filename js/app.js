@@ -19,6 +19,8 @@ const settings = require("./resources/settings.json");
 // TODO Supports audio recording.
 // TODO Improve FFmpeg JSON preset format.
 // TODO Create GStreamer JSON preset format.
+// TODO Add support for nesting (group -> processes) to client interface.
+// TODO Allow closure of process groups. (In addition to "all" and by name.)
 
 if (settings.utility != "ffmpeg" && settings.utility != "gstreamer") {
     console.error(`Supported utilities are FFmpeg ("ffmpeg") and GStreamer ("gstreamer").\nCurrently settings.utility == ${settings.utility}\nPlease edit ./js/resources/settings.json appropriately.\nExiting...`);
@@ -32,8 +34,6 @@ if (!baseRecordDirectory) {
 }
 
 app.use(bodyParser.urlencoded({ extended: true }));
-
-function reloadWindow(n) { return `setTimeout(function(){window.location.reload();},${n})`; }
 
 app.get("/", (req, res) => {
     pm2.connect((error) => {
@@ -49,7 +49,7 @@ app.get("/", (req, res) => {
         }).join("");
 
         // TODO Indicate SUCCESS/FAILURE on page
-        const record = `<div class="block"><form method="post" onsubmit="${reloadWindow(250)}">${devices}<p><input class="btn btn-b smooth" type="submit" value="record"></p></form></div>`;
+        const record = `<div class="block"><form method="post" onsubmit="${handlers.reloadWindow(250)}">${devices}<p><input class="btn btn-b smooth" type="submit" value="record"></p></form></div>`;
 
         // TODO Implement fail strategy
         pm2.list((error, processDescriptionList) => {
@@ -60,7 +60,7 @@ app.get("/", (req, res) => {
                 return `<tr><td><label class="process"><input type="checkbox" class="smooth" name="${p.name}"></label></td><td>${p.pm_id}</td><td>${p.name}</td><td>${p.pm2_env.status}</td><td>${created.format("HH:mm:ss YYYY-MM-DD")}</td><td>${uptime.hours()}h${uptime.minutes()}m${uptime.seconds()}s</td><td>${p.pm2_env.restart_time}</td></tr>`;
             }).join("");
 
-            const status  = `<div class="block"><form action="/stop" method="post" onsubmit="${reloadWindow(1600)}"><table><tr><th></th><th>id</th><th>name</th><th>status</th><th>created</th><th>uptime</th><th>restarts</th></tr>${pm2list}</table><br><input class="btn btn-c smooth" type="submit" value="stop"></form></div>`;
+            const status  = `<div class="block"><form action="/stop" method="post" onsubmit="${handlers.reloadWindow(1600)}"><table><tr><th></th><th>id</th><th>name</th><th>status</th><th>created</th><th>uptime</th><th>restarts</th></tr>${pm2list}</table><br><input class="btn btn-c smooth" type="submit" value="stop"></form></div>`;
 
             res.send(`<!DOCTYPE html><html><head><title>Simple Record | Controls</title><style>${min.css}</style></head><body>${record}${status}</body></html>`);
             return pm2.disconnect();

@@ -1,5 +1,5 @@
 # Simple Record Control
-Lightweight HTTP interface for synchronously starting and stopping recording processes from multiple devices. Based on [Express.js](https://expressjs.com/) and [PM2](http://pm2.keymetrics.io/) and built for use with [FFmpeg](https://ffmpeg.org/) and [GStreamer](https://gstreamer.freedesktop.org/) as well.
+Lightweight HTTP interface for synchronously starting and stopping recording processes from multiple devices. Based on [Express.js](https://expressjs.com/) and [PM2](http://pm2.keymetrics.io/); built for use with [FFmpeg](https://ffmpeg.org/) and [GStreamer](https://gstreamer.freedesktop.org/).
 
 ## Resources
 The `js/resources` directory contains a set of JSON files used to configure Simple Record Control.
@@ -12,7 +12,7 @@ The `js/resources` directory contains a set of JSON files used to configure Simp
     - settings.json
     - sources.json
 
-### *ffmpeg.json* & *gstreamer.json*
+### *presets/*
 Settings for FFmpeg and GStreamer. If you plan to use both, **IDs should match!!**
 
 #### *ffmpeg.json*
@@ -43,7 +43,16 @@ Settings for FFmpeg and GStreamer. If you plan to use both, **IDs should match!!
 
 #### *gstreamer.json*
 ```json
-{}
+{
+    "vp9": {
+    },
+    "x264": {
+    },
+    "x264.2": {
+    },
+    "vp9-local": {
+    }
+}
 ```
 
 ### *css.json*
@@ -54,41 +63,28 @@ Settings for FFmpeg and GStreamer. If you plan to use both, **IDs should match!!
 }
 ```
 
-### *encoders.json*
-*default* is required
-```json
-{
-    "default": {
-        "preInput": "-f v4l2 -r 25",
-        "postInput": "-c:v libvpx-vp9 -b:v 350k -g 30 -f webm",
-        "videoFormat": "webm"
-    },
-    "x264": {
-        "preInput": "-thread_queue_size 64 -rtsp_transport tcp -f rtsp -r 25",
-        "postInput": "-c:v libx264 -profile:v high -an",
-        "videoFormat": "mp4"
-    }
-}
-```
-
 ### *settings.json*
+Valid utlities (CaSE seNSiTIvE)
+- ffmpeg
+- gstreamer
+
 ```json
 {
     "general": {
-        "baseDir": "./recordings"
+        "baseDir": "./recordings",
+        "utility": "ffmpeg"
     }
 }
 ```
 
 ### *sources.json*
-(id = 0) == (id = 1)
 ```json
 [
     {
         "id": 1,
         "name": "",
         "addr": "rtsp://stream:user@192.168.0.101:554/...",
-        "encoder": "default"
+        "encoder": "vp9"
     },
     {
         "id": 2,
