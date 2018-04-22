@@ -1,8 +1,8 @@
 {
   "name": "simple-record-control",
-  "version": "0.0.8",
-  "description": "Lightweight HTTP interface for synchronously starting and stopping multiple recording processes.",
-  "main": "js/server.js",
+  "version": "0.0.9",
+  "description": "Lightweight HTTP interface for synchronously starting and stopping recording processes from multiple devices.",
+  "main": "js/app.js",
   "directories": {
     "doc": "docs"
   },
@@ -15,7 +15,7 @@
   },
   "devDependencies": {},
   "scripts": {
-    "server": "node ./js/server.js",
+    "app": "node ./js/app.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {

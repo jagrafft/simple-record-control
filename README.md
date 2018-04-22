@@ -1,8 +1,50 @@
 # Simple Record Control
-Lightweight HTTP interface for synchronously starting and stopping multiple recording processes. Based on [Express.js](https://expressjs.com/) and [PM2](http://pm2.keymetrics.io/) and built for use with [FFmpeg](https://ffmpeg.org/) with plans to expand support to [GStreamer](https://gstreamer.freedesktop.org/) as well.
+Lightweight HTTP interface for synchronously starting and stopping recording processes from multiple devices. Based on [Express.js](https://expressjs.com/) and [PM2](http://pm2.keymetrics.io/) and built for use with [FFmpeg](https://ffmpeg.org/) and [GStreamer](https://gstreamer.freedesktop.org/) as well.
 
 ## Resources
-Settings and data sources are specified in JSON files found in `./js/resources/`
+The `js/resources` directory contains a set of JSON files used to configure Simple Record Control.
+
+- resources/
+    - presets/
+        - ffmpeg.json
+        - gstreamer.json
+    - css.json
+    - settings.json
+    - sources.json
+
+### *ffmpeg.json* & *gstreamer.json*
+Settings for FFmpeg and GStreamer. If you plan to use both, **IDs should match!!**
+
+#### *ffmpeg.json*
+```json
+{
+    "vp9": {
+        "preInput": "-thread_queue_size 1024 -rtsp_transport tcp -f rtsp -r 25",
+        "postInput": "-c:v libvpx-vp9 -g 30 -f webm",
+        "videoFormat": "webm"
+    },
+    "x264": {
+        "preInput": "-thread_queue_size 1024 -rtsp_transport tcp -f rtsp -r 25",
+        "postInput": "-c:v libx264 -profile:v high -an",
+        "videoFormat": "mp4"
+    },
+    "x264.2": {
+        "preInput": "-thread_queue_size 1024 -rtsp_transport tcp -f rtsp",
+        "postInput": "-c:v libx264 -an",
+        "videoFormat": "mp4"
+    },
+    "vp9-local": {
+        "preInput": "-thread_queue_size 1024",
+        "postInput": "-c:v libvpx-vp9 -an -g 30 -f webm",
+        "videoFormat": "webm"
+    }
+}
+```
+
+#### *gstreamer.json*
+```json
+{}
+```
 
 ### *css.json*
 ```json

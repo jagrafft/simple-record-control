@@ -14,12 +14,13 @@ const settings = require("./resources/settings.json");
 // TODO Implement websockets for communcation with client.
 // TODO Implement message passing between processes.
 // TODO Terminate all active processes on shutdown.
-// TODO Improve flexibility of encoder/decoder utilization.
 // TODO Determine method for individual streams to record to same directory.
 // TODO Supports FFmpeg and GStreamer.
-// TODO Supports audio.
+// TODO Supports audio recording.
+// TODO Improve FFmpeg JSON preset format.
+// TODO Create GStreamer JSON preset format.
 
-if (settings.utility != "ffmpeg" || settings.utility != "gstreamer") {
+if (settings.utility != "ffmpeg" && settings.utility != "gstreamer") {
     console.error(`Supported utilities are FFmpeg ("ffmpeg") and GStreamer ("gstreamer").\nCurrently settings.utility == ${settings.utility}\nPlease edit ./js/resources/settings.json appropriately.\nExiting...`);
     process.exit(0);
 }
@@ -42,8 +43,9 @@ app.get("/", (req, res) => {
             return pm2.disconnect();
         }
 
-        const devices = handlers.getSource().map((s) => {
-            return `<label class="device"><input type="checkbox" class="smooth" name="${s.id}">${s.name}</label>`;
+        const devices = Object.entries(handlers.getSource()).map((obj) => {
+            const source = obj[1];
+            return `<label class="device"><input type="checkbox" class="smooth" name="${obj[0]}">${source.name}</label>`;
         }).join("");
 
         // TODO Indicate SUCCESS/FAILURE on page
@@ -81,23 +83,28 @@ app.post("/", (req, res) => {
                     console.error(error);
                     return pm2.disconnect();
                 }
-
-                const name = handlers.uuid();
-                console.log(`starting ${name}`);
-
-                pm2.start({
-                    name: name,
-                    script: `./js/${settings.utility}.js`,
-                    args: deviceIds,
-                    cwd: dir,
-                    output: `./${name}-out.log`,
-                    error: `./${name}-error.log`,
-                    minUptime: 500,
-                    restartDelay: 500
-                },
-                (error) => {
-                    if (error) console.error(error);
-                    return pm2.disconnect();
+                
+                const group = handlers.uuid();
+                deviceIds.forEach((id) => {
+                    const name = `${group}_${id}`;
+                    const str = handlers.mkRecordString(id);
+                    const cmd = str.replace("__GROUP__", name);
+                    
+                    console.log(`starting ${name}`);
+                    pm2.start({
+                        name: name,
+                        script: `./js/utilities/record.js`,
+                        args: [cmd],
+                        cwd: dir,
+                        output: `./${name}-out.log`,
+                        error: `./${name}-error.log`,
+                        minUptime: 500,
+                        restartDelay: 500
+                    },
+                    (error) => {
+                        if (error) console.error(error);
+                        return pm2.disconnect();
+                    });
                 });
             });
         } else {

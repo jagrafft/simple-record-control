@@ -2,6 +2,9 @@
 /*jslint es6*/
 
 const { existsSync, mkdirSync } = require("fs");
+const ffmpeg = require("../resources/presets/ffmpeg.json");
+const gstreamer = require("../resources/presets/gstreamer.json");
+const settings = require("../resources/settings.json");
 const sources = require("../resources/sources.json");
 
 function createDirectory(dir) {
@@ -13,14 +16,26 @@ function createDirectory(dir) {
     }
 }
 
-function getSource(index = null) {
-    const result = index == null ? sources : sources[index];
+function getSource(src = null) {
+    const result = src == null ? sources : sources[String(src)];
     return result;
 }
 
-function getStatus(index = null) {
-    const result = index == null ? "all" : "index = " + index;
+function mkRecordString(id) {
+    const source = getSource(id);
+    const result = (settings.utility == "ffmpeg") ? ffmpegRecordString(source) : gstRecordString(source);
     return result;
+
+}
+
+function ffmpegRecordString(source) {
+    const preset = ffmpeg[source.preset];
+    const cmd = `ffmpeg -report -y ${preset.preInput} -i "${source.addr}" ${preset.postInput} "__GROUP__-${source.name}-__TS__.${preset.videoFormat}"`;
+    return cmd;
+}
+
+function gstRecordString(source) {
+    return `NOT YET IMPLEMENTED`;
 }
 
 function uuid() {
@@ -30,6 +45,6 @@ function uuid() {
 }
 
 module.exports.createDirectory = createDirectory;
+module.exports.mkRecordString = mkRecordString;
 module.exports.getSource = getSource;
-module.exports.getStatus = getStatus;
 module.exports.uuid = uuid;

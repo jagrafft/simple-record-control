@@ -5,6 +5,7 @@
 
 sources.json
 
+gst*/
 local_docs/
 node_modules/
 recordings*/
