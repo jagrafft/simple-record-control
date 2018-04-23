@@ -4,8 +4,8 @@
 const {exec} = require("child_process");
 const moment = require("moment");
 
-const ts = moment().format("YMMDD-HHmmss");  // Timestamp format matches FFmpeg's `-report`
-const cmd = process.argv[2].replace("__TS__", ts);
+const ts = moment().format("YMMDD-HHmmss");
+const cmd = process.argv[2].replace(/__TS__/g, ts);
 
 // maxBuffer = 128MiB = (128 * 1024 * 1024)bytes = 134217728bytes
 exec(cmd, { maxBuffer: 134217728 }, (error, stdout, stderr) => {

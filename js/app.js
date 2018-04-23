@@ -20,7 +20,6 @@ const settings = require("./resources/settings.json");
 // TODO Create GStreamer JSON preset format.
 // TODO Add support for nesting (group -> processes) to client interface.
 // TODO Allow closure of process groups. (In addition to "all" and by name.)
-// TODO Customize FFmpeg log name. (Timestamp proximity causes overwrite.)
 // TODO Implement recovery method(s) for unclosed files.
 
 if (settings.utility != "ffmpeg" && settings.utility != "gstreamer") {
@@ -75,10 +74,12 @@ app.post("/", (req, res) => {
     if (deviceIds.length > 0) {
         const now = moment();
         const dir = `${settings.baseDir}/${now.format("YMMDD-HHmmss")}`;
+        
         const baseDirAvailable = handlers.createDirectory(settings.baseDir);
         const dirAvailable = handlers.createDirectory(dir);
+        const logDirAvailable = handlers.createDirectory(`${dir}/logs`);
 
-        if (baseDirAvailable && dirAvailable) {
+        if (baseDirAvailable && dirAvailable && logDirAvailable) {
             pm2.connect((error) => {
                 if (error) {
                     console.error(error);
@@ -89,7 +90,7 @@ app.post("/", (req, res) => {
                 deviceIds.forEach((id) => {
                     const name = `${group}_${id}`;
                     const str = handlers.mkRecordString(id);
-                    const cmd = str.replace("__GROUP__", name);
+                    const cmd = str.replace(/__GROUP__/g, name);
                     
                     console.log(`starting ${name}`);
                     pm2.start({
@@ -97,8 +98,8 @@ app.post("/", (req, res) => {
                         script: `./js/utilities/record.js`,
                         args: [cmd],
                         cwd: dir,
-                        output: `./${name}-out.log`,
-                        error: `./${name}-error.log`,
+                        output: `./logs/${name}-out.log`,
+                        error: `./logs/${name}-error.log`,
                         minUptime: 500,
                         restartDelay: 500
                     },
