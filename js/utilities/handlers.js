@@ -16,9 +16,29 @@ function createDirectory(dir) {
     }
 }
 
+function ffmpegRecordString(source) {
+    const preset = ffmpeg[source.encoder];
+    const cmd = `FFREPORT=file="./logs/__GROUP__-ffmpeg-${source.name}-__TS__.log":level=40 ffmpeg -y ${preset.preInput} -i "${source.addr}" ${preset.postInput} "__GROUP__-${source.name}-__TS__.${preset.extension}"`;
+    return cmd;
+}
+
 function getSource(src = null) {
     const result = src == null ? sources : sources[String(src)];
     return result;
+}
+
+function groupBy(list, fn) {
+    let groups = {};
+    list.forEach((item) => {
+        let group = fn(item);
+        groups[group] = groups[group] || [];
+        groups[group].push(item);
+    });
+    return groups;
+}
+
+function gstRecordString(source) {
+    return `NOT YET IMPLEMENTED`;
 }
 
 function mkRecordString(id) {
@@ -26,16 +46,6 @@ function mkRecordString(id) {
     const result = (settings.utility == "ffmpeg") ? ffmpegRecordString(source) : gstRecordString(source);
     return result;
 
-}
-
-function ffmpegRecordString(source) {
-    const preset = ffmpeg[source.encoder];
-    const cmd = `FFREPORT=file="./logs/__GROUP__-ffmpeg-${source.name}-__TS__.log":level=40 ffmpeg -y ${preset.preInput} -i "${source.addr}" ${preset.postInput} "__GROUP__-${source.name}-__TS__.${preset.extension}"`;
-    return cmd;
-}
-
-function gstRecordString(source) {
-    return `NOT YET IMPLEMENTED`;
 }
 
 function recordEvent(obj) {
@@ -55,8 +65,9 @@ function uuid() {
 }
 
 module.exports.createDirectory = createDirectory;
-module.exports.reloadWindow = reloadWindow;
-module.exports.mkRecordString = mkRecordString;
 module.exports.getSource = getSource;
-module.exports.uuid = uuid;
+module.exports.groupBy = groupBy;
+module.exports.mkRecordString = mkRecordString;
 module.exports.recordEvent = recordEvent;
+module.exports.reloadWindow = reloadWindow;
+module.exports.uuid = uuid;

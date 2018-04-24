@@ -12,7 +12,7 @@ const settings = require("./resources/settings.json");
 
 // PUNCH LIST
 // TODO Add support for nesting (group -> processes) to client interface.
-// TODO Allow closure of process groups. (In addition to "all" and by name.)
+// TODO Allow closure of process groups. (In addition to "all" and individually (by name).)
 // TODO Terminate all active processes on shutdown.
 // TODO Supports FFmpeg and GStreamer.
 // TODO Improve FFmpeg JSON preset format.
@@ -68,6 +68,9 @@ app.get("/", (req, res) => {
                 };
             });
 
+            // const groups = handlers.groupBy(pm2list, group => group.group);
+            // console.log(`groups = ${JSON.stringify(groups)}`);
+
             const tableElements = pm2list.map((p) =>{
                 return `<tr><td><label class="process"><input type="checkbox" class="smooth" name="${p.name}"></label></td><td>${p.group}</td><td>${p.id}</td><td>${p.name}</td><td>${p.status}</td><td>${p.created.format("HH:mm:ss YYYY-MM-DD")}</td><td>${p.uptime.hours()}h${p.uptime.minutes()}m${p.uptime.seconds()}s</td><td>${p.restarts}</td></tr>`;
             }).join("");
@@ -105,6 +108,7 @@ app.post("/", (req, res) => {
                     const cmd = str.replace(/__GROUP__/g, name);
                     
                     handlers.recordEvent({path: `${dir}/logs/${name}-events.csv`, ts: moment().format("x"), label: "pm2.start"});
+                    console.log((`starting ${name}`))
                     pm2.start({
                         name: name,
                         script: `./js/utilities/record.js`,
