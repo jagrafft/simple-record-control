@@ -11,16 +11,15 @@ const min = require("./resources/css.json");
 const settings = require("./resources/settings.json");
 
 // PUNCH LIST
-// TODO Implement websockets for communcation with client.
-// TODO Implement PM2 messaging.
-// TODO Terminate all active processes on shutdown.
-// TODO Supports FFmpeg and GStreamer.
-// TODO Supports audio recording.
-// TODO Improve FFmpeg JSON preset format.
-// TODO Create GStreamer JSON preset format.
 // TODO Add support for nesting (group -> processes) to client interface.
 // TODO Allow closure of process groups. (In addition to "all" and by name.)
+// TODO Terminate all active processes on shutdown.
+// TODO Supports FFmpeg and GStreamer.
+// TODO Improve FFmpeg JSON preset format.
+// TODO Create GStreamer JSON preset format.
 // TODO Implement recovery method(s) for unclosed files.
+// TODO Implement websockets for communcation with client. (together with messaging)
+// TODO Implement PM2 messaging. (together with WS)
 
 if (settings.utility != "ffmpeg" && settings.utility != "gstreamer") {
     console.error(`Supported utilities are FFmpeg ("ffmpeg") and GStreamer ("gstreamer").\nCurrently settings.utility == ${settings.utility}\nPlease edit ./js/resources/settings.json appropriately.\nExiting...`);
@@ -54,13 +53,26 @@ app.get("/", (req, res) => {
         // TODO Implement fail strategy
         pm2.list((error, processDescriptionList) => {
             const now = moment();
+
             const pm2list = processDescriptionList.map((p) => {
                 const created = moment(p.pm2_env.created_at);
                 const uptime = moment.duration(now.diff(created));
-                return `<tr><td><label class="process"><input type="checkbox" class="smooth" name="${p.name}"></label></td><td>${p.pm_id}</td><td>${p.name}</td><td>${p.pm2_env.status}</td><td>${created.format("HH:mm:ss YYYY-MM-DD")}</td><td>${uptime.hours()}h${uptime.minutes()}m${uptime.seconds()}s</td><td>${p.pm2_env.restart_time}</td></tr>`;
+                return {
+                    id: p.pm_id,
+                    group: p.name.split("_")[0],
+                    name: p.name,
+                    status: p.pm2_env.status,
+                    created: created,
+                    uptime: uptime,
+                    restarts: p.pm2_env.restart_time
+                };
+            });
+
+            const tableElements = pm2list.map((p) =>{
+                return `<tr><td><label class="process"><input type="checkbox" class="smooth" name="${p.name}"></label></td><td>${p.group}</td><td>${p.id}</td><td>${p.name}</td><td>${p.status}</td><td>${p.created.format("HH:mm:ss YYYY-MM-DD")}</td><td>${p.uptime.hours()}h${p.uptime.minutes()}m${p.uptime.seconds()}s</td><td>${p.restarts}</td></tr>`;
             }).join("");
 
-            const status  = `<div class="block"><form action="/stop" method="post" onsubmit="${handlers.reloadWindow(1600)}"><table><tr><th></th><th>id</th><th>name</th><th>status</th><th>created</th><th>uptime</th><th>restarts</th></tr>${pm2list}</table><br><input class="btn btn-c smooth" type="submit" value="stop"></form></div>`;
+            const status = `<div class="block"><form action="/stop" method="post" onsubmit="${handlers.reloadWindow(1600)}"><table><tr><th></th><th>group</th><th>id</th><th>name</th><th>status</th><th>created</th><th>uptime</th><th>restarts</th></tr>${tableElements}</table><br><input class="btn btn-c smooth" type="submit" value="stop"></form></div>`;
 
             res.send(`<!DOCTYPE html><html><head><title>Simple Record | Controls</title><style>${min.css}</style></head><body>${record}${status}</body></html>`);
             return pm2.disconnect();
@@ -73,7 +85,8 @@ app.post("/", (req, res) => {
 
     if (deviceIds.length > 0) {
         const now = moment();
-        const dir = `${settings.baseDir}/${now.format("YMMDD-HHmmss")}`;
+        const group = handlers.uuid();
+        const dir = `${settings.baseDir}/${group}_${now.format("YMMDD-HHmmss")}`;
         
         const baseDirAvailable = handlers.createDirectory(settings.baseDir);
         const dirAvailable = handlers.createDirectory(dir);
@@ -86,13 +99,12 @@ app.post("/", (req, res) => {
                     return pm2.disconnect();
                 }
                 
-                const group = handlers.uuid();
                 deviceIds.forEach((id) => {
                     const name = `${group}_${id}`;
                     const str = handlers.mkRecordString(id);
                     const cmd = str.replace(/__GROUP__/g, name);
                     
-                    handlers.recordEvent({path: `${dir}/logs/${name}-events.csv`, ts: moment().format("x"), label: "pm2.start called"});
+                    handlers.recordEvent({path: `${dir}/logs/${name}-events.csv`, ts: moment().format("x"), label: "pm2.start"});
                     pm2.start({
                         name: name,
                         script: `./js/utilities/record.js`,

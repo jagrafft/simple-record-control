@@ -30,7 +30,7 @@ function mkRecordString(id) {
 
 function ffmpegRecordString(source) {
     const preset = ffmpeg[source.encoder];
-    const cmd = `FFREPORT=file="./logs/__GROUP__-ffmpeg-${source.name}-__TS__.log":level=40 ffmpeg -y ${preset.preInput} -i "${source.addr}" ${preset.postInput} "__GROUP__-${source.name}-__TS__.${preset.videoFormat}"`;
+    const cmd = `FFREPORT=file="./logs/__GROUP__-ffmpeg-${source.name}-__TS__.log":level=40 ffmpeg -y ${preset.preInput} -i "${source.addr}" ${preset.postInput} "__GROUP__-${source.name}-__TS__.${preset.extension}"`;
     return cmd;
 }
 

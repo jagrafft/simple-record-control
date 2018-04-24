@@ -21,22 +21,22 @@ Settings for FFmpeg and GStreamer. If you plan to use both, **IDs should match!!
     "vp9": {
         "preInput": "-thread_queue_size 1024 -rtsp_transport tcp -f rtsp -r 25",
         "postInput": "-c:v libvpx-vp9 -g 30 -f webm",
-        "videoFormat": "webm"
+        "extension": "webm"
     },
     "x264": {
         "preInput": "-thread_queue_size 1024 -rtsp_transport tcp -f rtsp -r 25",
         "postInput": "-c:v libx264 -profile:v high -an",
-        "videoFormat": "mp4"
+        "extension": "mp4"
     },
     "x264.2": {
         "preInput": "-thread_queue_size 1024 -rtsp_transport tcp -f rtsp",
         "postInput": "-c:v libx264 -an",
-        "videoFormat": "mp4"
+        "extension": "mp4"
     },
     "vp9-local": {
         "preInput": "-thread_queue_size 1024",
         "postInput": "-c:v libvpx-vp9 -an -g 30 -f webm",
-        "videoFormat": "webm"
+        "extension": "webm"
     }
 }
 ```
