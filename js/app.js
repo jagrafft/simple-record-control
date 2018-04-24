@@ -92,11 +92,11 @@ app.post("/", (req, res) => {
                     const str = handlers.mkRecordString(id);
                     const cmd = str.replace(/__GROUP__/g, name);
                     
-                    console.log(`starting ${name}`);
+                    handlers.recordEvent({path: `${dir}/logs/${name}-events.csv`, ts: moment().format("x"), label: "pm2.start called"});
                     pm2.start({
                         name: name,
                         script: `./js/utilities/record.js`,
-                        args: [cmd],
+                        args: [cmd, name],
                         cwd: dir,
                         output: `./logs/${name}-out.log`,
                         error: `./logs/${name}-error.log`,
@@ -128,6 +128,7 @@ app.post("/stop", (req, res) => {
         if (procs.length == 0) procs = ["all"];
 
         procs.forEach((p) => {
+            // handlers.recordEvent({path: `${dir}/logs/${name}-events.csv`, ts: moment().format("x"), label: "pm2.delete called"});
             pm2.delete(p, (error) => {
                 if (error) console.error(error);
                 console.log(`deleting ${p} ...`);

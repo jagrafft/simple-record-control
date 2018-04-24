@@ -1,7 +1,7 @@
 /*global require*/
 /*jslint es6*/
 
-const { existsSync, mkdirSync } = require("fs");
+const { existsSync, mkdirSync, appendFileSync } = require("fs");
 const ffmpeg = require("../resources/presets/ffmpeg.json");
 const gstreamer = require("../resources/presets/gstreamer.json");
 const settings = require("../resources/settings.json");
@@ -38,6 +38,12 @@ function gstRecordString(source) {
     return `NOT YET IMPLEMENTED`;
 }
 
+function recordEvent(obj) {
+    appendFileSync(obj.path, `${obj.ts},"${obj.label.replace(/"/g,"'")}"\n`, (error) => {
+        if (error) console.error(error);
+    });
+}
+
 function reloadWindow(n) {
     return `setTimeout(function(){window.location.reload();},${n})`;
 }
@@ -53,3 +59,4 @@ module.exports.reloadWindow = reloadWindow;
 module.exports.mkRecordString = mkRecordString;
 module.exports.getSource = getSource;
 module.exports.uuid = uuid;
+module.exports.recordEvent = recordEvent;
