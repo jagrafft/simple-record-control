@@ -1,7 +1,7 @@
 {
     "opus": {
-        "preInput": "",
-        "postInput": "",
+        "preInput": "thread_queue_size 512 -f pulse -sample_rate 48k -channels 2 -frame_size 2",
+        "postInput": "-c:a libopus -b:a 96k",
         "extension": "opus"
     },
     "x264": {

@@ -11,12 +11,11 @@ const min = require("./resources/css.json");
 const settings = require("./resources/settings.json");
 
 // PUNCH LIST
-// TODO Add support for nesting (group -> processes) to client interface.
-// TODO Allow closure of process groups. (In addition to "all" and individually (by name).)
-// TODO Terminate all active processes on shutdown.
 // TODO Supports FFmpeg and GStreamer.
+// TODO Terminate all active processes on shutdown.
 // TODO Improve FFmpeg JSON preset format.
 // TODO Create GStreamer JSON preset format.
+// TODO Implement code tests.
 // TODO Implement recovery method(s) for unclosed files.
 // TODO Implement websockets for communcation with client. (together with messaging)
 // TODO Implement PM2 messaging. (together with WS)
@@ -68,16 +67,19 @@ app.get("/", (req, res) => {
                 };
             });
 
-            // const groups = handlers.groupBy(pm2list, group => group.group);
-            // console.log(`groups = ${JSON.stringify(groups)}`);
+            const groups = handlers.groupBy(pm2list, group => group.group);
 
-            const tableElements = pm2list.map((p) =>{
-                return `<tr><td><label class="process"><input type="checkbox" class="smooth" name="${p.name}"></label></td><td>${p.group}</td><td>${p.id}</td><td>${p.name}</td><td>${p.status}</td><td>${p.created.format("HH:mm:ss YYYY-MM-DD")}</td><td>${p.uptime.hours()}h${p.uptime.minutes()}m${p.uptime.seconds()}s</td><td>${p.restarts}</td></tr>`;
+            const unorderedList = Object.entries(groups).map((p) => {
+                const [group, ...procs] = p;
+                const procsListItems = procs[0].map((p) => { return `<li><label class="process"><input type="checkbox" class="smooth" name="${p.name}">${p.id} | ${p.name} | ${p.status} | ${p.created.format("HH:mm:ss YYYY-MM-DD")} | ${p.uptime.hours()}h${p.uptime.minutes()}m${p.uptime.seconds()}s | ${p.restarts}</label></li>`; }).join("");
+                return `<li><span onclick="const nodes = document.getElementById('${group}');nodes.childNodes.forEach((n) => { const node = n.childNodes[0].childNodes[0]; node.checked = !node.checked; console.log(node.name);});">${group}</span><ul id="${group}">${procsListItems}</ul></li>`;
             }).join("");
 
-            const status = `<div class="block"><form action="/stop" method="post" onsubmit="${handlers.reloadWindow(1600)}"><table><tr><th></th><th>group</th><th>id</th><th>name</th><th>status</th><th>created</th><th>uptime</th><th>restarts</th></tr>${tableElements}</table><br><input class="btn btn-c smooth" type="submit" value="stop"></form></div>`;
+            const status = `<div class="block"><form action="/stop" method="post" onsubmit="${handlers.reloadWindow(1600)}"><ul>${unorderedList}</ul><br><input class="btn btn-c smooth" type="submit" value="stop"></form></div>`;
 
-            res.send(`<!DOCTYPE html><html><head><title>Simple Record | Controls</title><style>${min.css}</style></head><body>${record}${status}</body></html>`);
+            const instructions = `<div class="block"><h3>Instructions</h3><ul><li>Click on parent (•) label to select children.</li><li><strong>stop</strong> with no checkboxes selected stops all processes.</li></ul></div>`;
+
+            res.send(`<!DOCTYPE html><html><head><title>Simple Record | Controls</title><style>${min.css}</style></head><body>${record}${status}${instructions}</body></html>`);
             return pm2.disconnect();
         });
     });

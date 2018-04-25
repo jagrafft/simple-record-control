@@ -18,13 +18,13 @@ Settings for FFmpeg and GStreamer. If you plan to use both, **IDs should match!!
 #### *ffmpeg.json*
 ```json
 {
-    "vp9": {
-        "preInput": "-thread_queue_size 1024 -rtsp_transport tcp -f rtsp -r 25",
-        "postInput": "-c:v libvpx-vp9 -g 30 -f webm",
-        "extension": "webm"
+    "opus": {
+        "preInput": "thread_queue_size 512 -f pulse -sample_rate 48k -channels 2 -frame_size 2",
+        "postInput": "-c:a libopus -b:a 96k",
+        "extension": "opus"
     },
     "x264": {
-        "preInput": "-thread_queue_size 1024 -rtsp_transport tcp -f rtsp -r 25",
+        "preInput": "-thread_queue_size 1024 -rtsp_transport tcp -f rtsp -r 30",
         "postInput": "-c:v libx264 -profile:v high -an",
         "extension": "mp4"
     },
@@ -32,6 +32,11 @@ Settings for FFmpeg and GStreamer. If you plan to use both, **IDs should match!!
         "preInput": "-thread_queue_size 1024 -rtsp_transport tcp -f rtsp",
         "postInput": "-c:v libx264 -an",
         "extension": "mp4"
+    },
+    "vp9": {
+        "preInput": "-thread_queue_size 1024 -rtsp_transport tcp -f rtsp -r 30",
+        "postInput": "-c:v libvpx-vp9 -g 30 -f webm",
+        "extension": "webm"
     },
     "vp9-local": {
         "preInput": "-thread_queue_size 1024",
@@ -44,11 +49,13 @@ Settings for FFmpeg and GStreamer. If you plan to use both, **IDs should match!!
 #### *gstreamer.json*
 ```json
 {
-    "vp9": {
+    "opus": {
     },
     "x264": {
     },
     "x264.2": {
+    },
+    "vp9": {
     },
     "vp9-local": {
     }

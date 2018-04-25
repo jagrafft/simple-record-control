@@ -1,6 +1,6 @@
 {
   "name": "simple-record-control",
-  "version": "0.0.10",
+  "version": "0.0.11",
   "description": "Lightweight HTTP interface for synchronously starting and stopping recording processes from multiple devices.",
   "main": "js/app.js",
   "directories": {
