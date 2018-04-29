@@ -1,14 +1,26 @@
 /*global require*/
 /*jslint es6*/
 
-const app = require("express")();
 const bodyParser = require("body-parser");
+const fs = require("fs");
+const https = require("https");
 const moment = require("moment");
 const pm2 = require("pm2");
+// const ws = require("ws");
 
 const handlers = require("./utilities/handlers.js");
 const min = require("./resources/css.json");
+const options = {
+    key: fs.readFileSync("./js/resources/certs/demo-key.pem"),
+    cert: fs.readFileSync("./js/resources/certs/demo-cert.pem"),
+    ca: fs.readFileSync("./js/resources/certs/demo-cert.pem"),
+    requestCert: false,
+    rejectUnauthorized: false
+};
 const settings = require("./resources/settings.json");
+
+const app = require("express")(options);
+const server = https.createServer(options, app);
 
 // PUNCH LIST
 // TODO Supports FFmpeg and GStreamer.
@@ -157,4 +169,4 @@ app.post("/stop", (req, res) => {
     // res.send('STOPPED');
 });
 
-app.listen(3000, () => console.log("listening on port 3000..."));
+server.listen(3000, () => console.log("listening on port 3000..."));
