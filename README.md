@@ -1,5 +1,7 @@
 # Simple Record Control
-Lightweight HTTP interface for synchronously starting and stopping recording processes from multiple devices. Based on [Express.js](https://expressjs.com/) and [PM2](http://pm2.keymetrics.io/); built for use with [FFmpeg](https://ffmpeg.org/) and [GStreamer](https://gstreamer.freedesktop.org/).
+Lightweight HTTPS interface for synchronously starting and stopping recording processes from multiple devices. Based on [Express.js](https://expressjs.com/) and [PM2](http://pm2.keymetrics.io/); built for use with [FFmpeg](https://ffmpeg.org/) and [GStreamer](https://gstreamer.freedesktop.org/).
+
+Includes a demo certificate for HTTPS interface which *most browsers will flag as invalid.* Change browser settings or set up proper certificates via, say, [Certbot](https://certbot.eff.org/).
 
 ## Resources
 The `js/resources` directory contains a set of JSON files used to configure Simple Record Control.
