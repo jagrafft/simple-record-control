@@ -6,31 +6,28 @@ const fs = require("fs");
 const https = require("https");
 const moment = require("moment");
 const pm2 = require("pm2");
-// const ws = require("ws");
+const WebSocket = require("ws");
 
 const handlers = require("./utilities/handlers.js");
-const min = require("./resources/css.json");
+const html_addons = require("./resources/html_addons.json");
 const options = {
-    key: fs.readFileSync("./js/resources/certs/demo-key.pem"),
-    cert: fs.readFileSync("./js/resources/certs/demo-cert.pem"),
-    ca: fs.readFileSync("./js/resources/certs/demo-cert.pem"),
-    requestCert: false,
-    rejectUnauthorized: false
+    key: fs.readFileSync("./js/resources/certs/demo-key.pem", "utf8"),
+    cert: fs.readFileSync("./js/resources/certs/demo-cert.pem", "utf8")
 };
 const settings = require("./resources/settings.json");
 
 const app = require("express")(options);
 const server = https.createServer(options, app);
+const wss = new WebSocket.Server({server});
 
 // PUNCH LIST
+// TODO Implement (secure) websockets for reporting PM2 status to client.
 // TODO Supports FFmpeg and GStreamer.
 // TODO Terminate all active processes on shutdown.
 // TODO Improve FFmpeg JSON preset format.
 // TODO Create GStreamer JSON preset format.
 // TODO Implement code tests.
 // TODO Implement recovery method(s) for unclosed files.
-// TODO Implement websockets for communcation with client. (together with messaging)
-// TODO Implement PM2 messaging. (together with WS)
 
 if (settings.utility != "ffmpeg" && settings.utility != "gstreamer") {
     console.error(`Supported utilities are FFmpeg ("ffmpeg") and GStreamer ("gstreamer").\nCurrently settings.utility == ${settings.utility}\nPlease edit ./js/resources/settings.json appropriately.\nExiting...`);
@@ -42,6 +39,13 @@ if (!baseRecordDirectory) {
     console.error(`Problem creating ${baseRecordDirectory}, please investigate. Exiting...`);
     process.exit(0);
 }
+
+wss.on("connection", (ws) => {
+    ws.on("message", (msg) => {
+        console.log(`(wss) msg = ${msg}`);
+    });
+    ws.send("w00t");
+});
 
 app.use(bodyParser.urlencoded({ extended: true }));
 
@@ -91,7 +95,7 @@ app.get("/", (req, res) => {
 
             const instructions = `<div class="block"><h3>Instructions</h3><ul><li>Click on parent (•) label to select children.</li><li><strong>stop</strong> with no checkboxes selected stops all processes.</li></ul></div>`;
 
-            res.send(`<!DOCTYPE html><html><head><title>Simple Record | Controls</title><style>${min.css}</style></head><body>${record}${status}${instructions}</body></html>`);
+            res.send(`<!DOCTYPE html><html><head><title>Simple Record | Controls</title><style>${html_addons.css}</style></head><body>${record}${status}${instructions}<script type="text/javascript">${html_addons.js}</script></body></html>`);
             return pm2.disconnect();
         });
     });
