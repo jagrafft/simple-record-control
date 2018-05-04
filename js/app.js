@@ -22,10 +22,8 @@ const wss = new WebSocket.Server({server});
 
 // PUNCH LIST
 // TODO Implement (secure) websockets for reporting PM2 status to client.
-// TODO Supports FFmpeg and GStreamer.
-// TODO Terminate all active processes on shutdown.
-// TODO Improve FFmpeg JSON preset format.
-// TODO Create GStreamer JSON preset format.
+// TODO Terminate all active processes on shutdown. (and/or crash?)
+// TODO Improve JSON preset formats.
 // TODO Implement code tests.
 // TODO Implement recovery method(s) for unclosed files.
 

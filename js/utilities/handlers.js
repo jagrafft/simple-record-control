@@ -17,7 +17,7 @@ function createDirectory(dir) {
 }
 
 function ffmpegRecordString(source) {
-    const preset = ffmpeg[source.encoder];
+    const preset = ffmpeg[source.preset];
     const cmd = `FFREPORT=file="./logs/__GROUP__-ffmpeg-${source.name}-__TS__.log":level=40 ffmpeg -y ${preset.preInput} -i "${source.addr}" ${preset.postInput} "__GROUP__-${source.name}-__TS__.${preset.extension}"`;
     return cmd;
 }
@@ -38,7 +38,10 @@ function groupBy(list, fn) {
 }
 
 function gstRecordString(source) {
-    return `NOT YET IMPLEMENTED`;
+    const preset = gstreamer[source.preset];
+    const pipeline = preset.pipeline.replace("__ADDR__", source.addr).replace("__FILENAME__", `__GROUP__-${source.name}-__TS__.${preset.extension}`);
+    const cmd = `GST_DEBUG=6 GST_DEBUG_FILE="./logs/__GROUP__-gstreamer-${source.name}-__TS__.log" GST_DEBUG_DUMP_DOT_DIR="./logs/" gst-launch-1.0 -e ${pipeline}`;
+    return cmd;
 }
 
 function mkRecordString(id) {

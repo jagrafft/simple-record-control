@@ -1,12 +1,11 @@
 {
-    "opus": {
-    },
+    "aac": {},
     "x264": {
+        "pipeline": "rtspsrc timeout=5 location=__ADDR__ ! rtph264depay ! video/x-h264 ! queue ! avdec_h264 ! queue ! x264enc key-int-max=60 speed-preset=veryfast tune=zerolatency ! queue ! h264parse ! queue ! mp4mux ! filesink location=\"__FILENAME__\"",
+        "extension": "mp4"
     },
-    "x264.2": {
-    },
-    "vp9": {
-    },
-    "vp9-local": {
+    "x264.multi": {
+        "pipeline": "rtspsrc timeout=5 location=__ADDR__ ! rtph264depay ! video/x-h264 ! queue ! avdec_h264 ! queue ! x264enc key-int-max=60 speed-preset=veryfast tune=zerolatency ! queue ! h264parse ! queue ! splitmuxsink max-size-time=1000000000 muxer=mp4mux location=\"%03d-__FILENAME__\"",
+        "extension": "mp4"
     }
 }
