@@ -21,11 +21,13 @@ const server = https.createServer(options, app);
 const wss = new WebSocket.Server({server});
 
 // PUNCH LIST
-// TODO Implement (secure) websockets for reporting PM2 status to client.
+// TODO Communicate PM2 status via WebSocket
 // TODO Terminate all active processes on shutdown. (and/or crash?)
 // TODO Improve JSON preset formats.
+// TODO Improve custom logger.
 // TODO Implement code tests.
 // TODO Implement recovery method(s) for unclosed files.
+// TODO Merge ffmpegRecordString() and gstRecordString()
 
 if (settings.utility != "ffmpeg" && settings.utility != "gstreamer") {
     console.error(`Supported utilities are FFmpeg ("ffmpeg") and GStreamer ("gstreamer").\nCurrently settings.utility == ${settings.utility}\nPlease edit ./js/resources/settings.json appropriately.\nExiting...`);
@@ -61,7 +63,7 @@ app.get("/", (req, res) => {
         }).join("");
 
         // TODO Indicate SUCCESS/FAILURE on page
-        const record = `<div class="block"><form method="post" onsubmit="${handlers.reloadWindow(250)}">${devices}<p><input class="btn btn-b smooth" type="submit" value="record"></p></form></div>`;
+        const record = `<div class="block"><form method="post" onsubmit="${handlers.reloadWindow(400)}">${devices}<p><input class="btn btn-b smooth" type="submit" value="record"></p></form></div>`;
 
         // TODO Implement fail strategy
         pm2.list((error, processDescriptionList) => {
@@ -89,7 +91,7 @@ app.get("/", (req, res) => {
                 return `<li><span onclick="const nodes = document.getElementById('${group}');nodes.childNodes.forEach((n) => { const node = n.childNodes[0].childNodes[0]; node.checked = !node.checked; console.log(node.name);});">${group}</span><ul id="${group}">${procsListItems}</ul></li>`;
             }).join("");
 
-            const status = `<div class="block"><form action="/stop" method="post" onsubmit="${handlers.reloadWindow(1600)}"><ul>${unorderedList}</ul><br><input class="btn btn-c smooth" type="submit" value="stop"></form></div>`;
+            const status = `<div class="block"><form action="/stop" method="post" onsubmit="${handlers.reloadWindow(1800)}"><ul>${unorderedList}</ul><br><input class="btn btn-c smooth" type="submit" value="stop"></form></div>`;
 
             const instructions = `<div class="block"><h3>Instructions</h3><ul><li>Click on parent (•) label to select children.</li><li><strong>stop</strong> with no checkboxes selected stops all processes.</li></ul></div>`;
 
@@ -171,4 +173,11 @@ app.post("/stop", (req, res) => {
     // res.send('STOPPED');
 });
 
-server.listen(3000, () => console.log("listening on port 3000..."));
+server.listen(3000, () => {
+    console.log("listening on port 3000...")
+    setInterval(() => {
+        wss.clients.forEach((client) => {
+            client.send(JSON.stringify({ w00t: moment().format("X") }));
+        });
+    }, 1000);    
+});

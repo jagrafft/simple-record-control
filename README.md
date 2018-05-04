@@ -21,28 +21,19 @@ Settings for FFmpeg and GStreamer. If you plan to use both, **IDs should match!!
 ```json
 {
     "opus": {
-        "preInput": "thread_queue_size 512 -f pulse -sample_rate 48k -channels 2 -frame_size 2",
-        "postInput": "-c:a libopus -b:a 96k",
+        "pipeline": "thread_queue_size 512 -f pulse -sample_rate 48k -channels 2 -frame_size 2 -i __ADDR__ -c:a libopus -b:a 96k __FILENAME__",
         "extension": "opus"
     },
     "x264": {
-        "preInput": "-thread_queue_size 1024 -rtsp_transport tcp -f rtsp -r 30",
-        "postInput": "-c:v libx264 -profile:v high -an",
+        "pipeline": "-thread_queue_size 1024 -rtsp_transport tcp -f rtsp -r 25 -i __ADDR__ -c:v libx264 -keyint_min 60 -g 60 -preset veryfast -tune zerolatency -an __FILENAME__",
         "extension": "mp4"
     },
-    "x264.2": {
-        "preInput": "-thread_queue_size 1024 -rtsp_transport tcp -f rtsp",
-        "postInput": "-c:v libx264 -an",
+    "x264.segments": {
+        "pipeline": "-thread_queue_size 1024 -rtsp_transport tcp -f rtsp -r 25 -i __ADDR__ -c:v libx264 -keyint_min 60 -g 60 -preset veryfast -tune zerolatency -an -f segment -segment_time 1 %03d-__FILENAME__",
         "extension": "mp4"
     },
     "vp9": {
-        "preInput": "-thread_queue_size 1024 -rtsp_transport tcp -f rtsp -r 30",
-        "postInput": "-c:v libvpx-vp9 -g 30 -f webm",
-        "extension": "webm"
-    },
-    "vp9-local": {
-        "preInput": "-thread_queue_size 1024",
-        "postInput": "-c:v libvpx-vp9 -an -g 30 -f webm",
+        "pipeline": "-thread_queue_size 1024 -rtsp_transport tcp -f rtsp -r 25 -i __ADDR__ -c:v libvpx-vp9 -g 30 -f webm __FILENAME__",
         "extension": "webm"
     }
 }
@@ -51,15 +42,13 @@ Settings for FFmpeg and GStreamer. If you plan to use both, **IDs should match!!
 #### *gstreamer.json*
 ```json
 {
-    "opus": {
-    },
     "x264": {
+        "pipeline": "rtspsrc timeout=5 location=__ADDR__ ! rtph264depay ! video/x-h264,width=1280,height=720,framerate=25/1 ! queue ! avdec_h264 ! x264enc key-int-max=60 speed-preset=veryfast tune=zerolatency ! queue ! h264parse ! mp4mux ! filesink location=__FILENAME__",
+        "extension": "mp4"
     },
-    "x264.2": {
-    },
-    "vp9": {
-    },
-    "vp9-local": {
+    "x264.segments": {
+        "pipeline": "rtspsrc timeout=5 location=__ADDR__ ! rtph264depay ! video/x-h264,width=1280,height=720,framerate=25/1 ! queue ! avdec_h264 ! x264enc key-int-max=60 speed-preset=veryfast tune=zerolatency ! queue ! h264parse ! splitmuxsink max-size-time=1000000000 muxer=mp4mux location=%03d-__FILENAME__",
+        "extension": "mp4"
     }
 }
 ```

@@ -1,4 +1,4 @@
 {
     "baseDir": "./recordings",
-    "utility": "gstreamer"
+    "utility": "ffmpeg"
 }

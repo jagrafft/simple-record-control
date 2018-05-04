@@ -27,5 +27,5 @@ process.on("SIGINT", () => {
     handlers.recordEvent({path: `./logs/${name}-events.csv`, ts: moment().format("x"), label: "SIGINT"});
     setTimeout(() => {
         process.exit(0);
-    }, 1200);
+    }, 1600);
 });
