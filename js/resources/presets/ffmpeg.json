@@ -1,18 +1,14 @@
 {
-    "opus": {
-        "pipeline": "thread_queue_size 512 -f pulse -sample_rate 48k -channels 2 -frame_size 2 -i __ADDR__ -c:a libopus -b:a 96k __FILENAME__",
-        "extension": "opus"
+    "aac": {
+        "pipeline": "thread_queue_size 512 -f pulse -sample_rate 48k -channels 2 -frame_size 2 -i __ADDR__ -c:a libfdk_aac -b:a 96k -f mp4 __FILENAME__",
+        "extension": "m4a"
     },
     "x264": {
-        "pipeline": "-thread_queue_size 1024 -rtsp_transport tcp -f rtsp -r 25 -i __ADDR__ -c:v libx264 -keyint_min 60 -g 60 -preset veryfast -tune zerolatency -an __FILENAME__",
+        "pipeline": "-thread_queue_size 1024 -rtsp_transport tcp -f rtsp -r 25 -i __ADDR__ -c:v libx264 -keyint_min 60 -g 60 -preset veryfast -tune zerolatency -an -f mp4 __FILENAME__",
         "extension": "mp4"
     },
     "x264.segments": {
         "pipeline": "-thread_queue_size 1024 -rtsp_transport tcp -f rtsp -r 25 -i __ADDR__ -c:v libx264 -keyint_min 60 -g 60 -preset veryfast -tune zerolatency -an -f segment -segment_time 1 %03d-__FILENAME__",
         "extension": "mp4"
-    },
-    "vp9": {
-        "pipeline": "-thread_queue_size 1024 -rtsp_transport tcp -f rtsp -r 25 -i __ADDR__ -c:v libvpx-vp9 -g 30 -f webm __FILENAME__",
-        "extension": "webm"
     }
 }

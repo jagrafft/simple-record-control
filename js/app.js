@@ -21,10 +21,10 @@ const server = https.createServer(options, app);
 const wss = new WebSocket.Server({server});
 
 // PUNCH LIST
-// TODO Communicate PM2 status via WebSocket
+// TODO Communicate PM2 status via WebSocket.
+// TODO Improve custom logger. (Piggyback on WS circuit.)
 // TODO Terminate all active processes on shutdown. (and/or crash?)
 // TODO Improve JSON preset formats.
-// TODO Improve custom logger.
 // TODO Implement code tests.
 // TODO Implement recovery method(s) for unclosed files.
 // TODO Merge ffmpegRecordString() and gstRecordString()
@@ -174,10 +174,10 @@ app.post("/stop", (req, res) => {
 });
 
 server.listen(3000, () => {
-    console.log("listening on port 3000...")
-    setInterval(() => {
-        wss.clients.forEach((client) => {
-            client.send(JSON.stringify({ w00t: moment().format("X") }));
-        });
-    }, 1000);    
+    console.log("listening on port 3000...");
+    // setInterval(() => {
+    //     wss.clients.forEach((client) => {
+    //         client.send(JSON.stringify({ w00t: moment().format("X") }));
+    //     });
+    // }, 1000);
 });
