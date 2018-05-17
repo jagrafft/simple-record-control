@@ -7,10 +7,10 @@
     "doc": "docs"
   },
   "dependencies": {
-    "body-parser": "^1.18.2",
+    "body-parser": "^1.18.3",
     "express": "^4.16.3",
     "moment": "^2.22.1",
-    "pm2": "^2.10.2",
+    "pm2": "^2.10.3",
     "ws": "^5.1.1"
   },
   "devDependencies": {},
@@ -22,6 +22,6 @@
     "type": "git",
     "url": "git+https://github.com/jagrafft/simple-record.git"
   },
-  "author": "jason a. grafft",
-  "license": "MIT"
+  "license": "MIT",
+  "author": "jason a. grafft <jason@grafft.co>"
 }

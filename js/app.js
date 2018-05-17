@@ -175,9 +175,9 @@ app.post("/stop", (req, res) => {
 
 server.listen(3000, () => {
     console.log("listening on port 3000...");
-    // setInterval(() => {
-    //     wss.clients.forEach((client) => {
-    //         client.send(JSON.stringify({ w00t: moment().format("X") }));
-    //     });
-    // }, 1000);
+    setInterval(() => {
+        wss.clients.forEach((client) => {
+            client.send(JSON.stringify({ w00t: moment().format("X") }));
+        });
+    }, 1000);
 });

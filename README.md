@@ -1,4 +1,6 @@
 # Simple Record Control
+**DEPRECATED:** Simple Record Control has been integrated, in its entirety, into the *vision* service as [cortex]().
+
 Lightweight HTTPS interface for synchronously starting and stopping recording processes from multiple devices. Based on [Express.js](https://expressjs.com/) and [PM2](http://pm2.keymetrics.io/); built for use with [FFmpeg](https://ffmpeg.org/) and [GStreamer](https://gstreamer.freedesktop.org/).
 
 **Obligate HTTPS!!** Includes demo certificates which *most browsers will flag as invalid.* For testing use `https://0.0.0.0:3000` and accept the "bad" certificate. For more formal use set up proper certificates via, say, [Certbot](https://certbot.eff.org/).
