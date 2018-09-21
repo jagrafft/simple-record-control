@@ -5,7 +5,7 @@
 *.mp4
 *.webm
 
-sources.json
+sources*
 
 gst*/
 local_docs/

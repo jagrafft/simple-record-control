@@ -1,7 +1,11 @@
 {
     "aac": {
-        "pipeline": "thread_queue_size 512 -f pulse -sample_rate 48k -channels 2 -frame_size 2 -i __ADDR__ -c:a libfdk_aac -b:a 96k -f mp4 __FILENAME__",
+        "pipeline": "-thread_queue_size 1024 -i __ADDR__ -c:a libfdk_aac -b:a 64k -f mp4 __FILENAME__",
         "extension": "m4a"
+    },
+    "hls": {
+        "pipeline": "",
+        "extension": ""
     },
     "x264": {
         "pipeline": "-thread_queue_size 1024 -rtsp_transport tcp -f rtsp -r 25 -i __ADDR__ -c:v libx264 -keyint_min 60 -g 60 -preset veryfast -tune zerolatency -an -f mp4 __FILENAME__",

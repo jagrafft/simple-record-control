@@ -2,22 +2,24 @@
 /*jslint es6*/
 
 const bodyParser = require("body-parser");
-const fs = require("fs");
-const https = require("https");
+// const fs = require("fs");
+// const https = require("https");
+const http = require("http");
 const moment = require("moment");
 const pm2 = require("pm2");
 const WebSocket = require("ws");
 
 const handlers = require("./utilities/handlers.js");
 const html_addons = require("./resources/html_addons.json");
-const options = {
-    key: fs.readFileSync("./js/resources/certs/demo-key.pem", "utf8"),
-    cert: fs.readFileSync("./js/resources/certs/demo-cert.pem", "utf8")
-};
+// const options = {
+//     key: fs.readFileSync("./js/resources/certs/demo-key.pem", "utf8"),
+//     cert: fs.readFileSync("./js/resources/certs/demo-cert.pem", "utf8")
+// };
 const settings = require("./resources/settings.json");
 
-const app = require("express")(options);
-const server = https.createServer(options, app);
+const app = require("express")();
+// const server = https.createServer(options, app);
+const server = http.createServer(app);
 const wss = new WebSocket.Server({server});
 
 // PUNCH LIST
